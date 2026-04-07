@@ -14,11 +14,9 @@ I created this tool after running into a problem while exporting .ply files from
 
 ---
 
-## Live demo
 
 👉 [**Open the converter**](https://gabriverga.github.io/gs-ply-converter)
 
----
 
 ## How to use
 
