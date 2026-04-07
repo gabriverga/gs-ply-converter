@@ -2,7 +2,7 @@
 
 A browser-based tool to convert Gaussian Splatting `.ply` files into standard RGB point clouds, no installation required.
 
-I created this tool after running into a problem while exporting .ply files from World Labs.
+I created this tool after running into a problem while exporting .ply files from Marble World Labs(https://marble.worldlabs.ai/).
 
 ---
 
