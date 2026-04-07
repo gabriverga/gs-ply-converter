@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GS PLY → RGB PLY Converter</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f0f11;
+    color: #e0dfd8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #f0efe8;
+  }
+
+  header p {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    color: #888;
+  }
+
+  .badge {
+    display: inline-block;
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    background: #0d2b1f;
+    color: #5DCAA5;
+    border-radius: 999px;
+    padding: 3px 12px;
+    font-weight: 500;
+    border: 0.5px solid #1D9E7540;
+  }
+
+  .card {
+    background: #1a1a1f;
+    border-radius: 16px;
+    border: 0.5px solid #2e2e38;
+    padding: 2rem;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  #dropzone {
+    border-radius: 12px;
+    padding: 0;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    height: 160px;
+  }
+
+  #dropzone canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  #dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+  }
+
+  #dz-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .drop-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.6rem;
+  }
+
+  #drop-label {
+    font-size: 0.92rem;
+    color: #999;
+    line-height: 1.6;
+  }
+
+  #drop-label strong {
+    color: #AFA9EC;
+  }
+
+  #file-info {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: #888;
+    background: #13131a;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 0.5px solid #2e2e38;
+    display: none;
+  }
+
+  #file-info .fname {
+    font-weight: 600;
+    color: #e0dfd8;
+    word-break: break-all;
+  }
+
+  #file-info .fsize {
+    color: #666;
+    margin-top: 2px;
+  }
+
+  #progress-wrap {
+    margin-top: 1.5rem;
+    display: none;
+  }
+
+  .progress-bar-bg {
+    background: #2a2a35;
+    border-radius: 999px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  #progress-bar {
+    height: 100%;
+    background: #7F77DD;
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.1s;
+  }
+
+  #progress-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.4rem;
+    text-align: right;
+  }
+
+  #btn-convert {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 10px;
+    border: none;
+    background: #534AB7;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: none;
+  }
+
+  #btn-convert:hover { background: #7F77DD; }
+  #btn-convert:active { transform: scale(0.98); }
+  #btn-convert:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
+
+  #status {
+    margin-top: 1rem;
+    font-size: 0.88rem;
+    text-align: center;
+    min-height: 1.2em;
+  }
+
+  #status.ok  { color: #5DCAA5; }
+  #status.err { color: #F09595; }
+  #status.inf { color: #666; }
+
+  #log {
+    margin-top: 1.25rem;
+    background: #0a0a0d;
+    color: #b0b0a8;
+    border-radius: 10px;
+    border: 0.5px solid #2a2a35;
+    padding: 1rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    max-height: 180px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  #log .line-ok   { color: #5DCAA5; }
+  #log .line-info { color: #888; }
+  #log .line-err  { color: #F09595; }
+
+  #download-wrap {
+    margin-top: 1.5rem;
+    display: none;
+    text-align: center;
+  }
+
+  #btn-download {
+    display: inline-block;
+    background: #1D9E75;
+    color: #fff;
+    padding: 0.7rem 2rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  #btn-download:hover { background: #5DCAA5; color: #0d2219; }
+
+  .dl-note {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.5rem;
+  }
+
+  footer {
+    margin-top: 2rem;
+    font-size: 0.78rem;
+    color: #444;
+    text-align: center;
+  }
+
+  footer a { color: #555; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>GS PLY → RGB PLY</h1>
+  <p>Convert Gaussian Splatting point clouds to standard RGB PLY</p>
+  <span class="badge">Runs entirely in your browser — no upload, no server</span>
+</header>
+
+<div class="card">
+
+  <div id="dropzone">
+    <canvas id="particle-canvas"></canvas>
+    <input type="file" id="file-input" accept=".ply">
+    <div id="dz-content">
+      <div class="drop-icon">📂</div>
+      <div id="drop-label">
+        <strong>Drop your .ply file here</strong><br>
+        or click to browse
+      </div>
+    </div>
+  </div>
+
+  <div id="file-info">
+    <div class="fname" id="fname"></div>
+    <div class="fsize" id="fsize"></div>
+  </div>
+
+  <div id="progress-wrap">
+    <div class="progress-bar-bg">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="progress-label">0%</div>
+  </div>
+
+  <button id="btn-convert">Convert to RGB PLY</button>
+
+  <div id="status" class="inf"></div>
+
+  <pre id="log"></pre>
+
+  <div id="download-wrap">
+    <a id="btn-download" href="#">Download converted .ply</a>
+    <div class="dl-note">Compatible with Unity, CloudCompare, MeshLab</div>
+  </div>
+
+</div>
+
+<footer>
+  created by @gabriverga with claude code<br>
+  No data leaves your device. Processing happens locally in your browser.
+</footer>
+
+<script>
+const pCanvas   = document.getElementById('particle-canvas');
+const pCtx      = pCanvas.getContext('2d');
+const pDropzone = document.getElementById('dropzone');
+
+let dzState = 'idle';
+
+const COLORS_IDLE     = ['#3a3a3a','#555555','#707070','#909090'];
+const COLORS_DRAGOVER = ['#606060','#888888','#b0b0b0','#d0d0d0'];
+const COLORS_DONE     = ['#4a4a4a','#666666','#888888','#aaaaaa'];
+
+const particles = [];
+const N = 55;
+
+function resizeCanvas() {
+  pCanvas.width  = pDropzone.offsetWidth;
+  pCanvas.height = pDropzone.offsetHeight;
+}
+
+function spawnOnBorder(w, h) {
+  const edge = Math.floor(Math.random() * 4);
+  const margin = 8;
+  let x, y;
+  if (edge === 0)      { x = Math.random() * w; y = margin; }
+  else if (edge === 1) { x = w - margin; y = Math.random() * h; }
+  else if (edge === 2) { x = Math.random() * w; y = h - margin; }
+  else                 { x = margin; y = Math.random() * h; }
+  const cx = w / 2, cy = h / 2;
+  const dx = cx - x, dy = cy - y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const speed = 0.25 + Math.random() * 0.45;
+  return {
+    x, y,
+    vx: (dx / dist) * speed,
+    vy: (dy / dist) * speed,
+    size: 1 + Math.random() * 2,
+    life: 0,
+    maxLife: 80 + Math.random() * 80,
+    colorIdx: Math.floor(Math.random() * 4),
+  };
+}
+
+function getColors() {
+  if (dzState === 'has-file') return COLORS_DONE;
+  if (dzState === 'dragover') return COLORS_DRAGOVER;
+  return COLORS_IDLE;
+}
+
+function initParticles() {
+  resizeCanvas();
+  particles.length = 0;
+  const w = pCanvas.width, h = pCanvas.height;
+  for (let i = 0; i < N; i++) {
+    const p = spawnOnBorder(w, h);
+    p.life = Math.floor(Math.random() * p.maxLife);
+    particles.push(p);
+  }
+}
+
+function drawBorder() {
+  const w = pCanvas.width, h = pCanvas.height;
+  pCtx.save();
+  pCtx.strokeStyle = dzState === 'idle' ? '#3a3a48'
+    : dzState === 'dragover' ? '#7F77DD66'
+    : '#1D9E7566';
+  pCtx.lineWidth = 1.5;
+  pCtx.setLineDash(dzState === 'has-file' ? [] : [6, 4]);
+  pCtx.beginPath();
+  pCtx.roundRect(1, 1, w - 2, h - 2, 12);
+  pCtx.stroke();
+  pCtx.restore();
+}
+
+function animateParticles() {
+  const w = pCanvas.width, h = pCanvas.height;
+  pCtx.clearRect(0, 0, w, h);
+  drawBorder();
+  const colors = getColors();
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life++;
+    const progress = p.life / p.maxLife;
+    const alpha = progress < 0.2 ? progress / 0.2 : 1 - ((progress - 0.2) / 0.8);
+    pCtx.save();
+    pCtx.globalAlpha = alpha * 0.85;
+    pCtx.fillStyle = colors[p.colorIdx % colors.length];
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    pCtx.fill();
+    pCtx.restore();
+    if (p.life >= p.maxLife) particles[i] = spawnOnBorder(w, h);
+  }
+  requestAnimationFrame(animateParticles);
+}
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  particles.forEach((_, i) => { particles[i] = spawnOnBorder(pCanvas.width, pCanvas.height); });
+});
+
+initParticles();
+animateParticles();
+</script>
+
+<script>
+const dropzone    = document.getElementById('dropzone');
+const fileInput   = document.getElementById('file-input');
+const fileInfo    = document.getElementById('file-info');
+const fnameEl     = document.getElementById('fname');
+const fsizeEl     = document.getElementById('fsize');
+const btnConvert  = document.getElementById('btn-convert');
+const progressWrap= document.getElementById('progress-wrap');
+const progressBar = document.getElementById('progress-bar');
+const progressLbl = document.getElementById('progress-label');
+const statusEl    = document.getElementById('status');
+const logEl       = document.getElementById('log');
+const dlWrap      = document.getElementById('download-wrap');
+const dlBtn       = document.getElementById('btn-download');
+
+let selectedFile = null;
+let outputURL    = null;
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  return (b / 1048576).toFixed(1) + ' MB';
+}
+
+function log(msg, type = 'info') {
+  logEl.style.display = 'block';
+  const span = document.createElement('span');
+  span.className = 'line-' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : 'info');
+  span.textContent = msg + '\n';
+  logEl.appendChild(span);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function setStatus(msg, type = 'inf') {
+  statusEl.textContent = msg;
+  statusEl.className = type;
+}
+
+function setProgress(pct) {
+  progressBar.style.width = pct + '%';
+  progressLbl.textContent = Math.round(pct) + '%';
+}
+
+function onFileSelected(file) {
+  if (!file || !file.name.toLowerCase().endsWith('.ply')) {
+    setStatus('Please select a .ply file.', 'err');
+    return;
+  }
+  selectedFile = file;
+  dzState = 'has-file';
+  document.getElementById('drop-label').innerHTML = `<strong>${file.name}</strong><br><span style="font-size:0.8rem;color:#5DCAA5">file ready</span>`;
+  fileInfo.style.display = 'block';
+  fnameEl.textContent = file.name;
+  fsizeEl.textContent = formatBytes(file.size);
+  btnConvert.style.display = 'block';
+  dlWrap.style.display = 'none';
+  logEl.style.display = 'none';
+  logEl.innerHTML = '';
+  setStatus('');
+  if (outputURL) { URL.revokeObjectURL(outputURL); outputURL = null; }
+}
+
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dzState = 'dragover'; });
+dropzone.addEventListener('dragleave', () => { dzState = 'idle'; });
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dzState = 'idle';
+  if (e.dataTransfer.files[0]) onFileSelected(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) onFileSelected(fileInput.files[0]); });
+
+const PLY_TYPES = {
+  float: ['f', 4], float32: ['f', 4],
+  double: ['d', 8], float64: ['d', 8],
+  int: ['i', 4], int32: ['i', 4],
+  uint: ['I', 4], uint32: ['I', 4],
+  short: ['h', 2], int16: ['h', 2],
+  ushort: ['H', 2], uint16: ['H', 2],
+  char: ['b', 1], int8: ['b', 1],
+  uchar: ['B', 1], uint8: ['B', 1],
+};
+
+function sigmoid(x) {
+  if (x >= 0) return 1 / (1 + Math.exp(-x));
+  const ex = Math.exp(x);
+  return ex / (1 + ex);
+}
+
+function parsePlyHeader(bytes) {
+  const dec = new TextDecoder('ascii');
+  let pos = 0;
+  let headerText = '';
+  while (pos < bytes.length) {
+    const end = bytes.indexOf(10, pos);
+    const lineBytes = bytes.slice(pos, end === -1 ? bytes.length : end + 1);
+    const line = dec.decode(lineBytes).replace(/\r?\n$/, '').trim();
+    headerText += line + '\n';
+    pos = end + 1;
+    if (line === 'end_header') break;
+    if (end === -1) break;
+  }
+  const headerEnd = pos;
+  let fmt = 'ascii', nVerts = 0;
+  const props = [];
+  let inVertex = false;
+  for (const line of headerText.split('\n')) {
+    const t = line.trim().split(/\s+/);
+    if (!t[0]) continue;
+    if (t[0] === 'format') { fmt = t[1]; }
+    else if (t[0] === 'element') { inVertex = t[1] === 'vertex'; if (inVertex) nVerts = parseInt(t[2]); }
+    else if (t[0] === 'property' && inVertex) {
+      if (t[1] === 'list') props.push({ name: t[4], type: 'list' });
+      else props.push({ name: t[2], type: t[1] });
+    }
+  }
+  return { headerEnd, fmt, nVerts, props };
+}
+
+function buildLayout(props) {
+  let offset = 0;
+  const fields = [];
+  for (const p of props) {
+    if (p.type === 'list') throw new Error(`List property '${p.name}' not supported in vertex.`);
+    const [, size] = PLY_TYPES[p.type] || (() => { throw new Error(`Unknown type: ${p.type}`); })();
+    fields.push({ name: p.name, type: p.type, offset, size });
+    offset += size;
+  }
+  return { fields, vertexSize: offset };
+}
+
+function readField(view, byteOffset, type, littleEndian) {
+  switch (type) {
+    case 'float': case 'float32': return view.getFloat32(byteOffset, littleEndian);
+    case 'double': case 'float64': return view.getFloat64(byteOffset, littleEndian);
+    case 'int': case 'int32': return view.getInt32(byteOffset, littleEndian);
+    case 'uint': case 'uint32': return view.getUint32(byteOffset, littleEndian);
+    case 'short': case 'int16': return view.getInt16(byteOffset, littleEndian);
+    case 'ushort': case 'uint16': return view.getUint16(byteOffset, littleEndian);
+    case 'char': case 'int8': return view.getInt8(byteOffset);
+    case 'uchar': case 'uint8': return view.getUint8(byteOffset);
+    default: throw new Error('Unknown type: ' + type);
+  }
+}
+
+function makeOutputHeader(nVerts) {
+  return [
+    'ply',
+    'format binary_little_endian 1.0',
+    'comment Converted from Gaussian Splatting',
+    `element vertex ${nVerts}`,
+    'property float x',
+    'property float y',
+    'property float z',
+    'property uchar red',
+    'property uchar green',
+    'property uchar blue',
+    'end_header',
+    ''
+  ].join('\r\n');
+}
+
+btnConvert.addEventListener('click', async () => {
+  if (!selectedFile) return;
+
+  btnConvert.disabled = true;
+  dlWrap.style.display = 'none';
+  logEl.innerHTML = '';
+  logEl.style.display = 'block';
+  progressWrap.style.display = 'block';
+  setProgress(0);
+  setStatus('Reading file…', 'inf');
+
+  try {
+    const arrayBuffer = await selectedFile.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+
+    log(`File loaded: ${formatBytes(bytes.length)}`);
+
+    const { headerEnd, fmt, nVerts, props } = parsePlyHeader(bytes);
+    const propNames = props.map(p => p.name);
+
+    log(`Format: ${fmt}`);
+    log(`Vertices: ${nVerts.toLocaleString()}`);
+    log(`Properties: ${propNames.join(', ')}`);
+
+    const required = ['x', 'y', 'z', 'f_dc_0', 'f_dc_1', 'f_dc_2'];
+    for (const r of required) {
+      if (!propNames.includes(r)) throw new Error(`Missing required property: '${r}'`);
+    }
+
+    if (fmt !== 'binary_little_endian' && fmt !== 'binary_big_endian' && fmt !== 'ascii') {
+      throw new Error(`Unsupported format: ${fmt}`);
+    }
+
+    const { fields, vertexSize } = buildLayout(props);
+    const fieldMap = {};
+    for (const f of fields) fieldMap[f.name] = f;
+
+    const isLE = fmt !== 'binary_big_endian';
+    const isASCII = fmt === 'ascii';
+
+    const headerStr = makeOutputHeader(nVerts);
+    const headerBytes = new TextEncoder().encode(headerStr);
+    const outBuf = new ArrayBuffer(headerBytes.length + nVerts * 15);
+    const outBytes = new Uint8Array(outBuf);
+    const outView = new DataView(outBuf);
+
+    outBytes.set(headerBytes, 0);
+    let outPos = headerBytes.length;
+
+    setStatus('Converting…', 'inf');
+
+    const CHUNK = 50000;
+
+    if (isASCII) {
+      const dec = new TextDecoder('ascii');
+      const text = dec.decode(bytes.slice(headerEnd));
+      const lines = text.split('\n');
+      const ix = propNames.indexOf('x'), iy = propNames.indexOf('y'), iz = propNames.indexOf('z');
+      const ir = propNames.indexOf('f_dc_0'), ig = propNames.indexOf('f_dc_1'), ib = propNames.indexOf('f_dc_2');
+
+      for (let i = 0; i < nVerts; i++) {
+        const parts = lines[i].trim().split(/\s+/);
+        outView.setFloat32(outPos, parseFloat(parts[ix]), true); outPos += 4;
+        outView.setFloat32(outPos, parseFloat(parts[iy]), true); outPos += 4;
+        outView.setFloat32(outPos, parseFloat(parts[iz]), true); outPos += 4;
+        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(parseFloat(parts[ir])) * 255)));
+        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(parseFloat(parts[ig])) * 255)));
+        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(parseFloat(parts[ib])) * 255)));
+        if (i % CHUNK === 0) { setProgress(i / nVerts * 100); await new Promise(r => setTimeout(r, 0)); }
+      }
+    } else {
+      const view = new DataView(arrayBuffer, headerEnd);
+      const fx = fieldMap['x'], fy = fieldMap['y'], fz = fieldMap['z'];
+      const fr = fieldMap['f_dc_0'], fg = fieldMap['f_dc_1'], fb = fieldMap['f_dc_2'];
+
+      for (let i = 0; i < nVerts; i++) {
+        const base = i * vertexSize;
+        outView.setFloat32(outPos, readField(view, base + fx.offset, fx.type, isLE), true); outPos += 4;
+        outView.setFloat32(outPos, readField(view, base + fy.offset, fy.type, isLE), true); outPos += 4;
+        outView.setFloat32(outPos, readField(view, base + fz.offset, fz.type, isLE), true); outPos += 4;
+        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(readField(view, base + fr.offset, fr.type, isLE)) * 255)));
+        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(readField(view, base + fg.offset, fg.type, isLE)) * 255)));
+        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(readField(view, base + fb.offset, fb.type, isLE)) * 255)));
+        if (i % CHUNK === 0) { setProgress(i / nVerts * 100); await new Promise(r => setTimeout(r, 0)); }
+      }
+    }
+
+    setProgress(100);
+
+    const blob = new Blob([outBuf], { type: 'application/octet-stream' });
+    if (outputURL) URL.revokeObjectURL(outputURL);
+    outputURL = URL.createObjectURL(blob);
+
+    const outName = selectedFile.name.replace(/\.ply$/i, '') + '_rgb.ply';
+    dlBtn.href = outputURL;
+    dlBtn.download = outName;
+    dlWrap.style.display = 'block';
+
+    log(`Done! ${nVerts.toLocaleString()} vertices converted.`, 'ok');
+    log(`Output size: ${formatBytes(outBuf.byteLength)}`, 'ok');
+    setStatus('Conversion complete!', 'ok');
+
+  } catch (err) {
+    log('ERROR: ' + err.message, 'err');
+    setStatus('Error: ' + err.message, 'err');
+  }
+
+  btnConvert.disabled = false;
+});
+</script>
+</body>
+</html>
