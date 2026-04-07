@@ -18,7 +18,7 @@ This tool fixes exactly that — it reads the `f_dc` values, converts them to pr
 
 | Before | After |
 |--------|-------|
-| ![Wrong colors — the point cloud appears as a flat yellow-green mass](images/before.png) | ![Correct colors — the point cloud shows realistic colors](images/after.png) |
+| ![Wrong colors — the point cloud appears as a flat yellow-green mass](images/before.png) | ![Correct colors - the point cloud shows realistic colors](images/after.png) |
 
 ---
 
@@ -52,4 +52,4 @@ Once done, click **Download converted .ply** to save the file.
 
 ## Credits
 
-Created by [@gabriverga](https://www.instagram.com/gabriverga/) with [Claude Code](https://claude.ai/code)
+Created by [@gabriverga](https://www.instagram.com/gabriverga/) with [Claude Code]
