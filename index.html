@@ -238,12 +238,33 @@
 
   footer {
     margin-top: 2rem;
-    font-size: 0.78rem;
-    color: #444;
+    font-size: 0.82rem;
+    color: #555;
     text-align: center;
+    line-height: 1.8;
   }
 
-  footer a { color: #555; }
+  footer a {
+    color: #888;
+    text-decoration: none;
+    border-bottom: 0.5px solid #555;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  footer a:hover {
+    color: #e0dfd8;
+    border-color: #e0dfd8;
+  }
+
+  .footer-credit {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .footer-credit strong {
+    color: #999;
+    font-weight: 500;
+  }
 </style>
 </head>
 <body>
@@ -251,7 +272,7 @@
 <header>
   <h1>GS PLY → RGB PLY</h1>
   <p>Convert Gaussian Splatting point clouds to standard RGB PLY</p>
-  <span class="badge">Runs entirely in your browser — no upload, no server</span>
+  <span class="badge">Runs entirely in your browser - no upload, no server</span>
 </header>
 
 <div class="card">
@@ -288,13 +309,13 @@
 
   <div id="download-wrap">
     <a id="btn-download" href="#">Download converted .ply</a>
-    <div class="dl-note">Compatible with Unity, CloudCompare, MeshLab</div>
+    <div class="dl-note">Compatible with Unity, CloudCompare, Blender, Houdini...</div>
   </div>
 
 </div>
 
 <footer>
-  created by @gabriverga with claude code<br>
+  <div class="footer-credit">created by <strong><a href="https://www.instagram.com/gabriverga/" target="_blank" rel="noopener">@gabriverga</a></strong> with Claude Code</div>
   No data leaves your device. Processing happens locally in your browser.
 </footer>
 
