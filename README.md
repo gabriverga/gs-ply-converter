@@ -5,6 +5,7 @@ A browser-based tool to convert Gaussian Splatting `.ply` files into standard RG
 I created this tool after running into a problem while exporting .ply files from [Marble World Labs](https://marble.worldlabs.ai/).
 
 ---
+👉 [**Open the converter**](https://gabriverga.github.io/gs-ply-converter)
 
 ## Before & after
 
@@ -13,9 +14,6 @@ I created this tool after running into a problem while exporting .ply files from
 | ![Wrong colors — the point cloud appears as a flat yellow-green mass](images/before.png) | ![Correct colors - the point cloud shows realistic colors](images/after.png) |
 
 ---
-
-
-👉 [**Open the converter**](https://gabriverga.github.io/gs-ply-converter)
 
 
 ## How to use
