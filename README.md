@@ -1,16 +1,6 @@
 # GS PLY → RGB PLY Converter
 
-A browser-based tool to convert Gaussian Splatting `.ply` files into standard RGB point clouds — no installation required.
-
----
-
-## Why this exists
-
-**Gaussian Splatting** is a technique for capturing and rendering 3D scenes from photos or video. The output is a `.ply` file where colors are not stored as standard RGB values, but as **spherical harmonics DC components** (`f_dc_0`, `f_dc_1`, `f_dc_2`) — a mathematical representation that most 3D software cannot read directly.
-
-I ran into this problem while downloading `.ply` files from **World Lab / Marble World**: every time I imported them into CloudCompare, Houdini or Blender, the point cloud showed up with completely wrong or missing colors.
-
-This tool fixes exactly that — it reads the `f_dc` values, converts them to proper RGB using a sigmoid function, and outputs a clean `.ply` file that any software can read correctly.
+A browser-based tool to convert Gaussian Splatting `.ply` files into standard RGB point clouds, no installation required.
 
 ---
 
@@ -52,4 +42,4 @@ Once done, click **Download converted .ply** to save the file.
 
 ## Credits
 
-Created by [@gabriverga](https://www.instagram.com/gabriverga/) with [Claude Code]
+Created by [@gabriverga](https://www.instagram.com/gabriverga/) with Claude Code
