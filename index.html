@@ -64,7 +64,7 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    height: 160px;
+    height: 260px;
   }
 
   #dropzone canvas {
@@ -317,6 +317,8 @@
 <footer>
   <div class="footer-credit">created by <strong><a href="https://www.instagram.com/gabriverga/" target="_blank" rel="noopener">@gabriverga</a></strong> with Claude Code</div>
   No data leaves your device. Processing happens locally in your browser.
+  <br><br>
+  For support, contact me on <a href="https://www.instagram.com/gabriverga/" target="_blank" rel="noopener">Instagram</a> via DM.
 </footer>
 
 <script>
@@ -325,6 +327,7 @@ const pCtx      = pCanvas.getContext('2d');
 const pDropzone = document.getElementById('dropzone');
 
 let dzState = 'idle';
+let mouse = { x: null, y: null, inside: false };
 
 const COLORS_IDLE     = ['#3a3a3a','#555555','#707070','#909090'];
 const COLORS_DRAGOVER = ['#606060','#888888','#b0b0b0','#d0d0d0'];
@@ -332,6 +335,14 @@ const COLORS_DONE     = ['#4a4a4a','#666666','#888888','#aaaaaa'];
 
 const particles = [];
 const N = 55;
+
+pDropzone.addEventListener('mousemove', e => {
+  const rect = pCanvas.getBoundingClientRect();
+  mouse.x = e.clientX - rect.left;
+  mouse.y = e.clientY - rect.top;
+  mouse.inside = true;
+});
+pDropzone.addEventListener('mouseleave', () => { mouse.inside = false; });
 
 function resizeCanvas() {
   pCanvas.width  = pDropzone.offsetWidth;
@@ -354,6 +365,8 @@ function spawnOnBorder(w, h) {
     x, y,
     vx: (dx / dist) * speed,
     vy: (dy / dist) * speed,
+    baseVx: (dx / dist) * speed,
+    baseVy: (dy / dist) * speed,
     size: 1 + Math.random() * 2,
     life: 0,
     maxLife: 80 + Math.random() * 80,
@@ -399,6 +412,28 @@ function animateParticles() {
   const colors = getColors();
   for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
+
+    if (mouse.inside && mouse.x !== null) {
+      const dx = mouse.x - p.x;
+      const dy = mouse.y - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const radius = 80;
+      if (dist < radius) {
+        const force = (1 - dist / radius) * 0.04;
+        p.vx += dx * force;
+        p.vy += dy * force;
+        const maxSpeed = 3;
+        const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (spd > maxSpeed) { p.vx = (p.vx / spd) * maxSpeed; p.vy = (p.vy / spd) * maxSpeed; }
+      } else {
+        p.vx += (p.baseVx - p.vx) * 0.05;
+        p.vy += (p.baseVy - p.vy) * 0.05;
+      }
+    } else {
+      p.vx += (p.baseVx - p.vx) * 0.05;
+      p.vy += (p.baseVy - p.vy) * 0.05;
+    }
+
     p.x += p.vx;
     p.y += p.vy;
     p.life++;
@@ -411,7 +446,9 @@ function animateParticles() {
     pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
     pCtx.fill();
     pCtx.restore();
-    if (p.life >= p.maxLife) particles[i] = spawnOnBorder(w, h);
+    if (p.life >= p.maxLife) {
+      particles[i] = spawnOnBorder(w, h);
+    }
   }
   requestAnimationFrame(animateParticles);
 }
