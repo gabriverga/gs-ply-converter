@@ -4,67 +4,177 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GS PLY → RGB PLY Converter</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111120'/%3E%3Ccircle cx='9' cy='9' r='2.5' fill='%234da3ff'/%3E%3Ccircle cx='23' cy='9' r='2.5' fill='%234da3ff' opacity='.5'/%3E%3Ccircle cx='9' cy='23' r='2.5' fill='%234da3ff' opacity='.5'/%3E%3Ccircle cx='23' cy='23' r='2.5' fill='%2330d158'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23fff' opacity='.9'/%3E%3Ccircle cx='16' cy='9' r='1.5' fill='%234da3ff' opacity='.35'/%3E%3Ccircle cx='9' cy='16' r='1.5' fill='%234da3ff' opacity='.35'/%3E%3Ccircle cx='23' cy='16' r='1.5' fill='%2330d158' opacity='.35'/%3E%3Ccircle cx='16' cy='23' r='1.5' fill='%2330d158' opacity='.35'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --blur: 32px;
+    --glass-bg: rgba(28,28,40,0.65);
+    --glass-border: rgba(255,255,255,0.1);
+    --glass-shadow: 0 8px 48px rgba(0,0,0,0.55), 0 2px 12px rgba(0,0,0,0.35);
+    --glass-inner: rgba(38,38,54,0.8);
+    --text: #f0f0f5;
+    --text-sec: #8e8e99;
+    --text-ter: #42424e;
+    --accent: #4da3ff;
+    --accent-glow: rgba(77,163,255,0.3);
+    --green: #30d158;
+    --green-bg: rgba(48,209,88,0.1);
+    --red: #ff453a;
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f0f11;
-    color: #e0dfd8;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 3rem 1.5rem;
+    padding: 4rem 1.5rem 3rem;
+    position: relative;
+    overflow-x: hidden;
+    background: #08080f;
   }
 
+  /* ── BACKGROUND ── */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(110px);
+    pointer-events: none;
+    z-index: 0;
+    animation: blobDrift ease-in-out infinite;
+  }
+  .blob-1 { width: 700px; height: 700px; background: rgba(40,70,200,0.5); opacity: 0.45; top: -280px; left: -200px; animation-duration: 24s; }
+  .blob-2 { width: 580px; height: 580px; background: rgba(120,40,210,0.45); opacity: 0.38; top: 20%; right: -220px; animation-duration: 30s; animation-delay: -9s; }
+  .blob-3 { width: 520px; height: 520px; background: rgba(15,150,110,0.4); opacity: 0.32; bottom: -130px; left: 10%; animation-duration: 26s; animation-delay: -16s; }
+
+  @keyframes blobDrift {
+    0%,100% { transform: translate(0,0) scale(1); }
+    33%      { transform: translate(35px,-50px) scale(1.06); }
+    66%      { transform: translate(-25px,30px) scale(0.96); }
+  }
+
+  header, footer { position: relative; z-index: 1; }
+
+  /* ── HEADER ── */
   header {
     text-align: center;
     margin-bottom: 2.5rem;
+    animation: rise 0.7s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    padding: 5px 14px 5px 10px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-sec);
+    margin-bottom: 1.4rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+    letter-spacing: 0.01em;
+  }
+
+  .logo-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(48,209,88,0.2);
+    animation: breathe 2.5s ease infinite;
+  }
+
+  @keyframes breathe {
+    0%,100% { box-shadow: 0 0 0 2px rgba(48,209,88,0.2); }
+    50%      { box-shadow: 0 0 0 5px rgba(48,209,88,0.08); }
   }
 
   header h1 {
-    font-size: 1.6rem;
+    font-size: 2.8rem;
     font-weight: 600;
-    letter-spacing: -0.02em;
-    color: #f0efe8;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    line-height: 1.05;
+    margin-bottom: 0.55rem;
+    text-shadow: 0 0 60px rgba(77,163,255,0.2);
   }
+
+  header h1 .arrow { color: var(--accent); font-weight: 300; }
 
   header p {
-    margin-top: 0.5rem;
-    font-size: 0.95rem;
-    color: #888;
+    font-size: 0.97rem;
+    color: var(--text-sec);
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
-  .badge {
-    display: inline-block;
-    margin-top: 0.75rem;
-    font-size: 0.75rem;
-    background: #0d2b1f;
-    color: #5DCAA5;
-    border-radius: 999px;
-    padding: 3px 12px;
-    font-weight: 500;
-    border: 0.5px solid #1D9E7540;
+  /* ── GLASS CARD ── */
+  .card-wrap {
+    width: 100%;
+    max-width: 520px;
+    perspective: 900px;
+    animation: rise 0.7s 0.1s cubic-bezier(.22,1,.36,1) both;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1rem;
   }
 
   .card {
-    background: #1a1a1f;
-    border-radius: 16px;
-    border: 0.5px solid #2e2e38;
-    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(1.6);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+    padding: 1.75rem;
     width: 100%;
-    max-width: 560px;
+    transform-style: preserve-3d;
+    transition: transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s cubic-bezier(.22,1,.36,1);
+    will-change: transform;
+    position: relative;
   }
 
+  .card-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    z-index: 10;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.08) 0%, transparent 70%);
+  }
+
+  /* ── DROPZONE ── */
   #dropzone {
-    border-radius: 12px;
-    padding: 0;
+    border-radius: 16px;
     text-align: center;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    height: 260px;
+    height: 200px;
+    background: rgba(255,255,255,0.03);
+    border: 1.5px dashed rgba(77,163,255,0.25);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  #dropzone.dragover {
+    border-color: var(--accent);
+    background: rgba(77,163,255,0.05);
   }
 
   #dropzone canvas {
@@ -72,7 +182,7 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    border-radius: 12px;
+    border-radius: 16px;
     pointer-events: none;
   }
 
@@ -95,207 +205,263 @@
     justify-content: center;
     z-index: 5;
     pointer-events: none;
+    gap: 0.4rem;
   }
 
-  .drop-icon {
-    font-size: 1.8rem;
-    margin-bottom: 0.6rem;
+  .drop-icon-wrap {
+    width: 48px; height: 48px;
+    background: rgba(77,163,255,0.1);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 0.3rem;
+    border: 1px solid rgba(77,163,255,0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   #drop-label {
-    font-size: 0.92rem;
-    color: #999;
+    font-size: 0.88rem;
+    color: var(--text-sec);
     line-height: 1.6;
+    letter-spacing: -0.01em;
   }
 
-  #drop-label strong {
-    color: #AFA9EC;
-  }
+  #drop-label strong { color: var(--accent); font-weight: 500; }
 
+  /* ── FILE INFO ── */
   #file-info {
-    margin-top: 1.5rem;
-    font-size: 0.85rem;
-    color: #888;
-    background: #13131a;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    border: 0.5px solid #2e2e38;
+    margin-top: 1.1rem;
+    background: var(--glass-inner);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(255,255,255,0.07);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
     display: none;
+    align-items: center;
+    gap: 0.75rem;
   }
+
+  .file-icon-wrap {
+    width: 34px; height: 34px; flex-shrink: 0;
+    background: rgba(77,163,255,0.12);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(77,163,255,0.2);
+  }
+
+  .file-meta { flex: 1; min-width: 0; }
 
   #file-info .fname {
-    font-weight: 600;
-    color: #e0dfd8;
-    word-break: break-all;
+    font-weight: 500; color: var(--text);
+    word-break: break-all; font-size: 0.83rem; letter-spacing: -0.01em;
   }
 
-  #file-info .fsize {
-    color: #666;
-    margin-top: 2px;
-  }
+  #file-info .fsize { color: var(--text-ter); font-size: 0.73rem; margin-top: 1px; }
 
-  #progress-wrap {
-    margin-top: 1.5rem;
-    display: none;
-  }
+  /* ── PROGRESS ── */
+  #progress-wrap { margin-top: 1.1rem; display: none; }
 
-  .progress-bar-bg {
-    background: #2a2a35;
+  .progress-track {
+    background: rgba(255,255,255,0.06);
     border-radius: 999px;
-    height: 8px;
+    height: 5px;
     overflow: hidden;
   }
 
   #progress-bar {
     height: 100%;
-    background: #7F77DD;
+    background: linear-gradient(90deg, var(--accent), #5ecfff);
     border-radius: 999px;
     width: 0%;
-    transition: width 0.1s;
+    transition: width 0.12s ease;
+    position: relative;
+  }
+
+  #progress-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: glide 1.2s linear infinite;
+  }
+
+  @keyframes glide {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 
   #progress-label {
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 0.4rem;
-    text-align: right;
+    font-size: 0.72rem; color: var(--text-ter);
+    margin-top: 0.4rem; text-align: right; letter-spacing: 0.01em;
   }
 
+  /* ── CONVERT BUTTON ── */
   #btn-convert {
-    margin-top: 1.5rem;
+    margin-top: 1.1rem;
     width: 100%;
-    padding: 0.75rem;
-    border-radius: 10px;
+    padding: 0.8rem;
+    border-radius: 14px;
     border: none;
-    background: #534AB7;
+    background: var(--accent);
     color: #fff;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    display: none;
-  }
-
-  #btn-convert:hover { background: #7F77DD; }
-  #btn-convert:active { transform: scale(0.98); }
-  #btn-convert:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; }
-
-  #status {
-    margin-top: 1rem;
-    font-size: 0.88rem;
-    text-align: center;
-    min-height: 1.2em;
-  }
-
-  #status.ok  { color: #5DCAA5; }
-  #status.err { color: #F09595; }
-  #status.inf { color: #666; }
-
-  #log {
-    margin-top: 1.25rem;
-    background: #0a0a0d;
-    color: #b0b0a8;
-    border-radius: 10px;
-    border: 0.5px solid #2a2a35;
-    padding: 1rem;
-    font-family: 'SF Mono', 'Fira Code', monospace;
-    font-size: 0.78rem;
-    line-height: 1.6;
-    max-height: 180px;
-    overflow-y: auto;
-    display: none;
-  }
-
-  #log .line-ok   { color: #5DCAA5; }
-  #log .line-info { color: #888; }
-  #log .line-err  { color: #F09595; }
-
-  #download-wrap {
-    margin-top: 1.5rem;
-    display: none;
-    text-align: center;
-  }
-
-  #btn-download {
-    display: inline-block;
-    background: #1D9E75;
-    color: #fff;
-    padding: 0.7rem 2rem;
-    border-radius: 10px;
+    font-family: inherit;
     font-size: 0.95rem;
     font-weight: 500;
-    text-decoration: none;
-    transition: background 0.15s;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(.22,1,.36,1);
+    display: none;
+    box-shadow: 0 4px 20px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.2);
   }
 
-  #btn-download:hover { background: #5DCAA5; color: #0d2219; }
+  #btn-convert:hover {
+    background: #6ab5ff;
+    box-shadow: 0 6px 28px rgba(77,163,255,0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+    transform: translateY(-1px);
+  }
 
-  .dl-note {
+  #btn-convert:active { transform: scale(0.98); box-shadow: 0 2px 10px var(--accent-glow); }
+  #btn-convert:disabled { background: rgba(255,255,255,0.06); color: var(--text-ter); cursor: not-allowed; box-shadow: none; transform: none; }
+
+  /* ── STATUS ── */
+  #status {
+    margin-top: 0.75rem;
     font-size: 0.8rem;
-    color: #555;
-    margin-top: 0.5rem;
-  }
-
-  footer {
-    margin-top: 2rem;
-    font-size: 0.82rem;
-    color: #555;
     text-align: center;
-    line-height: 1.8;
+    min-height: 1em;
+    letter-spacing: -0.01em;
   }
 
-  footer a {
-    color: #888;
-    text-decoration: none;
-    border-bottom: 0.5px solid #555;
-    transition: color 0.15s, border-color 0.15s;
+  #status.ok  { color: var(--green); }
+  #status.err { color: var(--red); }
+  #status.inf { color: var(--text-ter); }
+
+  /* ── LOG ── */
+  #log {
+    margin-top: 1rem;
+    background: rgba(0,0,0,0.3);
+    color: var(--text-sec);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 0.85rem 1rem;
+    font-family: 'SF Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    line-height: 1.75;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) transparent;
   }
 
-  footer a:hover {
-    color: #e0dfd8;
-    border-color: #e0dfd8;
-  }
+  #log::-webkit-scrollbar { width: 3px; }
+  #log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  #log .line-ok   { color: var(--green); }
+  #log .line-info { color: var(--text-ter); }
+  #log .line-err  { color: var(--red); }
 
-  .footer-credit {
-    font-size: 0.8rem;
-    color: #666;
-  }
+  /* ── DOWNLOAD ── */
+  #download-wrap { margin-top: 1.25rem; display: none; text-align: center; }
 
-  .footer-credit strong {
-    color: #999;
+  #btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--green-bg);
+    color: var(--green);
+    padding: 0.75rem 1.75rem;
+    border-radius: 14px;
+    font-size: 0.92rem;
     font-weight: 500;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    border: 1px solid rgba(48,209,88,0.2);
+    transition: all 0.2s cubic-bezier(.22,1,.36,1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 16px rgba(48,209,88,0.12);
   }
+
+  #btn-download:hover {
+    background: rgba(48,209,88,0.16);
+    box-shadow: 0 6px 24px rgba(48,209,88,0.22);
+    transform: translateY(-1px);
+    border-color: rgba(48,209,88,0.35);
+  }
+
+  .dl-note { font-size: 0.73rem; color: var(--text-ter); margin-top: 0.55rem; letter-spacing: -0.01em; }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 2.5rem;
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.2);
+    text-align: center;
+    line-height: 2;
+    animation: rise 0.7s 0.25s cubic-bezier(.22,1,.36,1) both;
+    position: relative;
+    z-index: 2;
+  }
+
+  footer a { color: rgba(255,255,255,0.3); text-decoration: none; transition: color 0.15s; }
+  footer a:hover { color: rgba(255,255,255,0.65); }
+  .footer-credit { font-size: 0.76rem; color: rgba(255,255,255,0.2); }
+  .footer-credit strong a { color: var(--accent); font-weight: 500; opacity: 0.8; }
+  .footer-credit strong a:hover { opacity: 1; }
 </style>
 </head>
 <body>
 
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
 <header>
-  <h1>GS PLY → RGB PLY</h1>
-  <p>Convert Gaussian Splatting point clouds to standard RGB PLY</p>
-  <span class="badge">Runs entirely in your browser - no upload, no server</span>
+  <div class="logo-pill">
+    <span class="logo-dot"></span>
+    Runs entirely in your browser — no upload
+  </div>
+  <h1>GS PLY <span class="arrow">→</span> RGB PLY</h1>
+  <p>Convert Gaussian Splatting point clouds to standard RGB</p>
 </header>
 
+<div class="card-wrap">
 <div class="card">
+<div class="card-shine" id="card-shine"></div>
 
   <div id="dropzone">
     <canvas id="particle-canvas"></canvas>
     <input type="file" id="file-input" accept=".ply">
     <div id="dz-content">
-      <div class="drop-icon">📂</div>
+      <div class="drop-icon-wrap">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 3v11M7.5 10.5 11 14l3.5-3.5" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 16.5A2.5 2.5 0 0 0 6.5 19h9a2.5 2.5 0 0 0 2.5-2.5" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div id="drop-label">
-        <strong>Drop your .ply file here</strong><br>
+        <strong>Drop your .ply file</strong><br>
         or click to browse
       </div>
     </div>
   </div>
 
   <div id="file-info">
-    <div class="fname" id="fname"></div>
-    <div class="fsize" id="fsize"></div>
+    <div class="file-icon-wrap">PLY</div>
+    <div class="file-meta">
+      <div class="fname" id="fname"></div>
+      <div class="fsize" id="fsize"></div>
+    </div>
   </div>
 
   <div id="progress-wrap">
-    <div class="progress-bar-bg">
+    <div class="progress-track">
       <div id="progress-bar"></div>
     </div>
     <div id="progress-label">0%</div>
@@ -308,17 +474,23 @@
   <pre id="log"></pre>
 
   <div id="download-wrap">
-    <a id="btn-download" href="#">Download converted .ply</a>
-    <div class="dl-note">Compatible with Unity, CloudCompare, Blender, Houdini...</div>
+    <a id="btn-download" href="#">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+        <path d="M7.5 1v9M4.5 7.5 7.5 10l3-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12.5h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Download converted .ply
+    </a>
+    <div class="dl-note">CloudCompare · Blender · Houdini · Unity</div>
   </div>
 
+</div>
 </div>
 
 <footer>
   <div class="footer-credit">created by <strong><a href="https://linktr.ee/gabriverga/" target="_blank" rel="noopener">@gabriverga</a></strong> with Claude</div>
-  No data leaves your device. Processing happens locally in your browser.
-  <br><br>
-  For support, contact me on <a href="https://www.instagram.com/gabriverga/" target="_blank" rel="noopener">Instagram</a> via DM.
+  No data leaves your device — processing is fully local.<br>
+  For support, DM me on <a href="https://www.instagram.com/gabriverga/" target="_blank" rel="noopener">Instagram</a>.
 </footer>
 
 <script>
@@ -329,12 +501,12 @@ const pDropzone = document.getElementById('dropzone');
 let dzState = 'idle';
 let mouse = { x: null, y: null, inside: false };
 
-const COLORS_IDLE     = ['#3a3a3a','#555555','#707070','#909090'];
-const COLORS_DRAGOVER = ['#606060','#888888','#b0b0b0','#d0d0d0'];
-const COLORS_DONE     = ['#4a4a4a','#666666','#888888','#aaaaaa'];
+const COLORS_IDLE     = ['rgba(77,163,255,0.2)','rgba(77,163,255,0.32)','rgba(94,207,255,0.18)','rgba(120,100,255,0.15)'];
+const COLORS_DRAGOVER = ['rgba(77,163,255,0.45)','rgba(77,163,255,0.6)','rgba(94,207,255,0.5)','rgba(120,100,255,0.4)'];
+const COLORS_DONE     = ['rgba(48,209,88,0.22)','rgba(48,209,88,0.38)','rgba(40,220,160,0.25)','rgba(70,200,120,0.18)'];
 
 const particles = [];
-const N = 55;
+const N = 48;
 
 pDropzone.addEventListener('mousemove', e => {
   const rect = pCanvas.getBoundingClientRect();
@@ -351,33 +523,25 @@ function resizeCanvas() {
 
 function spawnOnBorder(w, h) {
   const edge = Math.floor(Math.random() * 4);
-  const margin = 8;
+  const m = 8;
   let x, y;
-  if (edge === 0)      { x = Math.random() * w; y = margin; }
-  else if (edge === 1) { x = w - margin; y = Math.random() * h; }
-  else if (edge === 2) { x = Math.random() * w; y = h - margin; }
-  else                 { x = margin; y = Math.random() * h; }
-  const cx = w / 2, cy = h / 2;
-  const dx = cx - x, dy = cy - y;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const speed = 0.25 + Math.random() * 0.45;
+  if (edge === 0)      { x = Math.random() * w; y = m; }
+  else if (edge === 1) { x = w - m; y = Math.random() * h; }
+  else if (edge === 2) { x = Math.random() * w; y = h - m; }
+  else                 { x = m; y = Math.random() * h; }
+  const cx = w/2, cy = h/2;
+  const dx = cx-x, dy = cy-y;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  const speed = 0.2 + Math.random()*0.4;
   return {
     x, y,
-    vx: (dx / dist) * speed,
-    vy: (dy / dist) * speed,
-    baseVx: (dx / dist) * speed,
-    baseVy: (dy / dist) * speed,
-    size: 1 + Math.random() * 2,
+    vx: (dx/dist)*speed, vy: (dy/dist)*speed,
+    baseVx: (dx/dist)*speed, baseVy: (dy/dist)*speed,
+    size: 1.2 + Math.random()*1.8,
     life: 0,
-    maxLife: 80 + Math.random() * 80,
-    colorIdx: Math.floor(Math.random() * 4),
+    maxLife: 90 + Math.random()*90,
+    colorIdx: Math.floor(Math.random()*4),
   };
-}
-
-function getColors() {
-  if (dzState === 'has-file') return COLORS_DONE;
-  if (dzState === 'dragover') return COLORS_DRAGOVER;
-  return COLORS_IDLE;
 }
 
 function initParticles() {
@@ -386,7 +550,7 @@ function initParticles() {
   const w = pCanvas.width, h = pCanvas.height;
   for (let i = 0; i < N; i++) {
     const p = spawnOnBorder(w, h);
-    p.life = Math.floor(Math.random() * p.maxLife);
+    p.life = Math.floor(Math.random()*p.maxLife);
     particles.push(p);
   }
 }
@@ -394,13 +558,14 @@ function initParticles() {
 function drawBorder() {
   const w = pCanvas.width, h = pCanvas.height;
   pCtx.save();
-  pCtx.strokeStyle = dzState === 'idle' ? '#3a3a48'
-    : dzState === 'dragover' ? '#7F77DD66'
-    : '#1D9E7566';
+  const alpha = dzState === 'dragover' ? 0.55 : 0.25;
+  pCtx.strokeStyle = dzState === 'has-file'
+    ? `rgba(48,209,88,${alpha})`
+    : `rgba(77,163,255,${alpha})`;
   pCtx.lineWidth = 1.5;
-  pCtx.setLineDash(dzState === 'has-file' ? [] : [6, 4]);
+  pCtx.setLineDash(dzState === 'has-file' ? [] : [5,4]);
   pCtx.beginPath();
-  pCtx.roundRect(1, 1, w - 2, h - 2, 12);
+  pCtx.roundRect(1, 1, w-2, h-2, 16);
   pCtx.stroke();
   pCtx.restore();
 }
@@ -409,53 +574,43 @@ function animateParticles() {
   const w = pCanvas.width, h = pCanvas.height;
   pCtx.clearRect(0, 0, w, h);
   drawBorder();
-  const colors = getColors();
+  const colors = dzState==='has-file' ? COLORS_DONE : dzState==='dragover' ? COLORS_DRAGOVER : COLORS_IDLE;
   for (let i = 0; i < particles.length; i++) {
     const p = particles[i];
-
     if (mouse.inside && mouse.x !== null) {
-      const dx = mouse.x - p.x;
-      const dy = mouse.y - p.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const radius = 80;
-      if (dist < radius) {
-        const force = (1 - dist / radius) * 0.04;
-        p.vx += dx * force;
-        p.vy += dy * force;
-        const maxSpeed = 3;
-        const spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        if (spd > maxSpeed) { p.vx = (p.vx / spd) * maxSpeed; p.vy = (p.vy / spd) * maxSpeed; }
+      const dx = mouse.x-p.x, dy = mouse.y-p.y;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if (dist < 80) {
+        const force = (1-dist/80)*0.04;
+        p.vx += dx*force; p.vy += dy*force;
+        const spd = Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+        if (spd > 3) { p.vx=(p.vx/spd)*3; p.vy=(p.vy/spd)*3; }
       } else {
-        p.vx += (p.baseVx - p.vx) * 0.05;
-        p.vy += (p.baseVy - p.vy) * 0.05;
+        p.vx += (p.baseVx-p.vx)*0.05;
+        p.vy += (p.baseVy-p.vy)*0.05;
       }
     } else {
-      p.vx += (p.baseVx - p.vx) * 0.05;
-      p.vy += (p.baseVy - p.vy) * 0.05;
+      p.vx += (p.baseVx-p.vx)*0.05;
+      p.vy += (p.baseVy-p.vy)*0.05;
     }
-
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life++;
-    const progress = p.life / p.maxLife;
-    const alpha = progress < 0.2 ? progress / 0.2 : 1 - ((progress - 0.2) / 0.8);
+    p.x += p.vx; p.y += p.vy; p.life++;
+    const prog = p.life/p.maxLife;
+    const alpha = prog < 0.2 ? prog/0.2 : 1-((prog-0.2)/0.8);
     pCtx.save();
-    pCtx.globalAlpha = alpha * 0.85;
-    pCtx.fillStyle = colors[p.colorIdx % colors.length];
+    pCtx.globalAlpha = alpha * 0.9;
+    pCtx.fillStyle = colors[p.colorIdx];
     pCtx.beginPath();
-    pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    pCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
     pCtx.fill();
     pCtx.restore();
-    if (p.life >= p.maxLife) {
-      particles[i] = spawnOnBorder(w, h);
-    }
+    if (p.life >= p.maxLife) particles[i] = spawnOnBorder(w, h);
   }
   requestAnimationFrame(animateParticles);
 }
 
 window.addEventListener('resize', () => {
   resizeCanvas();
-  particles.forEach((_, i) => { particles[i] = spawnOnBorder(pCanvas.width, pCanvas.height); });
+  particles.forEach((_,i) => { particles[i] = spawnOnBorder(pCanvas.width, pCanvas.height); });
 });
 
 initParticles();
@@ -477,43 +632,31 @@ const logEl       = document.getElementById('log');
 const dlWrap      = document.getElementById('download-wrap');
 const dlBtn       = document.getElementById('btn-download');
 
-let selectedFile = null;
-let outputURL    = null;
+let selectedFile = null, outputURL = null;
 
 function formatBytes(b) {
   if (b < 1024) return b + ' B';
-  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-  return (b / 1048576).toFixed(1) + ' MB';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
 }
 
-function log(msg, type = 'info') {
+function log(msg, type='info') {
   logEl.style.display = 'block';
   const span = document.createElement('span');
-  span.className = 'line-' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : 'info');
-  span.textContent = msg + '\n';
+  span.className = 'line-'+(type==='ok'?'ok':type==='err'?'err':'info');
+  span.textContent = msg+'\n';
   logEl.appendChild(span);
   logEl.scrollTop = logEl.scrollHeight;
 }
 
-function setStatus(msg, type = 'inf') {
-  statusEl.textContent = msg;
-  statusEl.className = type;
-}
-
-function setProgress(pct) {
-  progressBar.style.width = pct + '%';
-  progressLbl.textContent = Math.round(pct) + '%';
-}
+function setStatus(msg, type='inf') { statusEl.textContent=msg; statusEl.className=type; }
+function setProgress(pct) { progressBar.style.width=pct+'%'; progressLbl.textContent=Math.round(pct)+'%'; }
 
 function onFileSelected(file) {
-  if (!file || !file.name.toLowerCase().endsWith('.ply')) {
-    setStatus('Please select a .ply file.', 'err');
-    return;
-  }
-  selectedFile = file;
-  dzState = 'has-file';
-  document.getElementById('drop-label').innerHTML = `<strong>${file.name}</strong><br><span style="font-size:0.8rem;color:#5DCAA5">file ready</span>`;
-  fileInfo.style.display = 'block';
+  if (!file||!file.name.toLowerCase().endsWith('.ply')) { setStatus('Please select a .ply file.','err'); return; }
+  selectedFile = file; dzState = 'has-file';
+  document.getElementById('drop-label').innerHTML = `<strong>${file.name}</strong><br><span style="font-size:0.78rem;color:#30d158">ready to convert</span>`;
+  fileInfo.style.display = 'flex';
   fnameEl.textContent = file.name;
   fsizeEl.textContent = formatBytes(file.size);
   btnConvert.style.display = 'block';
@@ -521,216 +664,187 @@ function onFileSelected(file) {
   logEl.style.display = 'none';
   logEl.innerHTML = '';
   setStatus('');
-  if (outputURL) { URL.revokeObjectURL(outputURL); outputURL = null; }
+  if (outputURL) { URL.revokeObjectURL(outputURL); outputURL=null; }
 }
 
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dzState = 'dragover'; });
-dropzone.addEventListener('dragleave', () => { dzState = 'idle'; });
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dzState='dragover'; dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => { dzState='idle'; dropzone.classList.remove('dragover'); });
 dropzone.addEventListener('drop', e => {
-  e.preventDefault();
-  dzState = 'idle';
+  e.preventDefault(); dzState='idle'; dropzone.classList.remove('dragover');
   if (e.dataTransfer.files[0]) onFileSelected(e.dataTransfer.files[0]);
 });
 fileInput.addEventListener('change', () => { if (fileInput.files[0]) onFileSelected(fileInput.files[0]); });
 
 const PLY_TYPES = {
-  float: ['f', 4], float32: ['f', 4],
-  double: ['d', 8], float64: ['d', 8],
-  int: ['i', 4], int32: ['i', 4],
-  uint: ['I', 4], uint32: ['I', 4],
-  short: ['h', 2], int16: ['h', 2],
-  ushort: ['H', 2], uint16: ['H', 2],
-  char: ['b', 1], int8: ['b', 1],
-  uchar: ['B', 1], uint8: ['B', 1],
+  float:['f',4],float32:['f',4],double:['d',8],float64:['d',8],
+  int:['i',4],int32:['i',4],uint:['I',4],uint32:['I',4],
+  short:['h',2],int16:['h',2],ushort:['H',2],uint16:['H',2],
+  char:['b',1],int8:['b',1],uchar:['B',1],uint8:['B',1],
 };
 
 function sigmoid(x) {
-  if (x >= 0) return 1 / (1 + Math.exp(-x));
-  const ex = Math.exp(x);
-  return ex / (1 + ex);
+  if (x>=0) return 1/(1+Math.exp(-x));
+  const ex=Math.exp(x); return ex/(1+ex);
 }
 
 function parsePlyHeader(bytes) {
-  const dec = new TextDecoder('ascii');
-  let pos = 0;
-  let headerText = '';
-  while (pos < bytes.length) {
-    const end = bytes.indexOf(10, pos);
-    const lineBytes = bytes.slice(pos, end === -1 ? bytes.length : end + 1);
-    const line = dec.decode(lineBytes).replace(/\r?\n$/, '').trim();
-    headerText += line + '\n';
-    pos = end + 1;
-    if (line === 'end_header') break;
-    if (end === -1) break;
+  const dec=new TextDecoder('ascii');
+  let pos=0, headerText='';
+  while (pos<bytes.length) {
+    const end=bytes.indexOf(10,pos);
+    const line=dec.decode(bytes.slice(pos,end===-1?bytes.length:end+1)).replace(/\r?\n$/,'').trim();
+    headerText+=line+'\n'; pos=end+1;
+    if (line==='end_header') break;
+    if (end===-1) break;
   }
-  const headerEnd = pos;
-  let fmt = 'ascii', nVerts = 0;
-  const props = [];
-  let inVertex = false;
+  let fmt='ascii', nVerts=0; const props=[]; let inVertex=false;
   for (const line of headerText.split('\n')) {
-    const t = line.trim().split(/\s+/);
+    const t=line.trim().split(/\s+/);
     if (!t[0]) continue;
-    if (t[0] === 'format') { fmt = t[1]; }
-    else if (t[0] === 'element') { inVertex = t[1] === 'vertex'; if (inVertex) nVerts = parseInt(t[2]); }
-    else if (t[0] === 'property' && inVertex) {
-      if (t[1] === 'list') props.push({ name: t[4], type: 'list' });
-      else props.push({ name: t[2], type: t[1] });
+    if (t[0]==='format') fmt=t[1];
+    else if (t[0]==='element') { inVertex=t[1]==='vertex'; if (inVertex) nVerts=parseInt(t[2]); }
+    else if (t[0]==='property'&&inVertex) {
+      if (t[1]==='list') props.push({name:t[4],type:'list'});
+      else props.push({name:t[2],type:t[1]});
     }
   }
-  return { headerEnd, fmt, nVerts, props };
+  return {headerEnd:pos, fmt, nVerts, props};
 }
 
 function buildLayout(props) {
-  let offset = 0;
-  const fields = [];
+  let offset=0; const fields=[];
   for (const p of props) {
-    if (p.type === 'list') throw new Error(`List property '${p.name}' not supported in vertex.`);
-    const [, size] = PLY_TYPES[p.type] || (() => { throw new Error(`Unknown type: ${p.type}`); })();
-    fields.push({ name: p.name, type: p.type, offset, size });
-    offset += size;
+    if (p.type==='list') throw new Error(`List property '${p.name}' not supported.`);
+    const [,size]=PLY_TYPES[p.type]||(()=>{throw new Error(`Unknown type: ${p.type}`)})();
+    fields.push({name:p.name,type:p.type,offset,size}); offset+=size;
   }
-  return { fields, vertexSize: offset };
+  return {fields,vertexSize:offset};
 }
 
-function readField(view, byteOffset, type, littleEndian) {
-  switch (type) {
-    case 'float': case 'float32': return view.getFloat32(byteOffset, littleEndian);
-    case 'double': case 'float64': return view.getFloat64(byteOffset, littleEndian);
-    case 'int': case 'int32': return view.getInt32(byteOffset, littleEndian);
-    case 'uint': case 'uint32': return view.getUint32(byteOffset, littleEndian);
-    case 'short': case 'int16': return view.getInt16(byteOffset, littleEndian);
-    case 'ushort': case 'uint16': return view.getUint16(byteOffset, littleEndian);
-    case 'char': case 'int8': return view.getInt8(byteOffset);
-    case 'uchar': case 'uint8': return view.getUint8(byteOffset);
-    default: throw new Error('Unknown type: ' + type);
+function readField(view,off,type,le) {
+  switch(type){
+    case 'float':case 'float32':return view.getFloat32(off,le);
+    case 'double':case 'float64':return view.getFloat64(off,le);
+    case 'int':case 'int32':return view.getInt32(off,le);
+    case 'uint':case 'uint32':return view.getUint32(off,le);
+    case 'short':case 'int16':return view.getInt16(off,le);
+    case 'ushort':case 'uint16':return view.getUint16(off,le);
+    case 'char':case 'int8':return view.getInt8(off);
+    case 'uchar':case 'uint8':return view.getUint8(off);
+    default:throw new Error('Unknown type: '+type);
   }
 }
 
-function makeOutputHeader(nVerts) {
-  return [
-    'ply',
-    'format binary_little_endian 1.0',
-    'comment Converted from Gaussian Splatting',
-    `element vertex ${nVerts}`,
-    'property float x',
-    'property float y',
-    'property float z',
-    'property uchar red',
-    'property uchar green',
-    'property uchar blue',
-    'end_header',
-    ''
-  ].join('\r\n');
+function makeOutputHeader(n) {
+  return ['ply','format binary_little_endian 1.0','comment Converted from Gaussian Splatting',
+    `element vertex ${n}`,'property float x','property float y','property float z',
+    'property uchar red','property uchar green','property uchar blue','end_header',''].join('\r\n');
 }
 
 btnConvert.addEventListener('click', async () => {
   if (!selectedFile) return;
-
-  btnConvert.disabled = true;
-  dlWrap.style.display = 'none';
-  logEl.innerHTML = '';
-  logEl.style.display = 'block';
-  progressWrap.style.display = 'block';
-  setProgress(0);
-  setStatus('Reading file…', 'inf');
-
+  btnConvert.disabled=true; dlWrap.style.display='none';
+  logEl.innerHTML=''; logEl.style.display='block';
+  progressWrap.style.display='block'; setProgress(0); setStatus('Reading file…','inf');
   try {
-    const arrayBuffer = await selectedFile.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-
+    const arrayBuffer=await selectedFile.arrayBuffer();
+    const bytes=new Uint8Array(arrayBuffer);
     log(`File loaded: ${formatBytes(bytes.length)}`);
-
-    const { headerEnd, fmt, nVerts, props } = parsePlyHeader(bytes);
-    const propNames = props.map(p => p.name);
-
-    log(`Format: ${fmt}`);
-    log(`Vertices: ${nVerts.toLocaleString()}`);
-    log(`Properties: ${propNames.join(', ')}`);
-
-    const required = ['x', 'y', 'z', 'f_dc_0', 'f_dc_1', 'f_dc_2'];
-    for (const r of required) {
-      if (!propNames.includes(r)) throw new Error(`Missing required property: '${r}'`);
-    }
-
-    if (fmt !== 'binary_little_endian' && fmt !== 'binary_big_endian' && fmt !== 'ascii') {
-      throw new Error(`Unsupported format: ${fmt}`);
-    }
-
-    const { fields, vertexSize } = buildLayout(props);
-    const fieldMap = {};
-    for (const f of fields) fieldMap[f.name] = f;
-
-    const isLE = fmt !== 'binary_big_endian';
-    const isASCII = fmt === 'ascii';
-
-    const headerStr = makeOutputHeader(nVerts);
-    const headerBytes = new TextEncoder().encode(headerStr);
-    const outBuf = new ArrayBuffer(headerBytes.length + nVerts * 15);
-    const outBytes = new Uint8Array(outBuf);
-    const outView = new DataView(outBuf);
-
-    outBytes.set(headerBytes, 0);
-    let outPos = headerBytes.length;
-
-    setStatus('Converting…', 'inf');
-
-    const CHUNK = 50000;
-
+    const {headerEnd,fmt,nVerts,props}=parsePlyHeader(bytes);
+    const propNames=props.map(p=>p.name);
+    log(`Format: ${fmt}`); log(`Vertices: ${nVerts.toLocaleString()}`); log(`Properties: ${propNames.join(', ')}`);
+    for (const r of ['x','y','z','f_dc_0','f_dc_1','f_dc_2'])
+      if (!propNames.includes(r)) throw new Error(`Missing: '${r}'`);
+    const {fields,vertexSize}=buildLayout(props);
+    const fieldMap={}; for (const f of fields) fieldMap[f.name]=f;
+    const isLE=fmt!=='binary_big_endian', isASCII=fmt==='ascii';
+    const headerStr=makeOutputHeader(nVerts);
+    const headerBytes=new TextEncoder().encode(headerStr);
+    const outBuf=new ArrayBuffer(headerBytes.length+nVerts*15);
+    const outBytes=new Uint8Array(outBuf); const outView=new DataView(outBuf);
+    outBytes.set(headerBytes,0); let outPos=headerBytes.length;
+    setStatus('Converting…','inf');
+    const CHUNK=50000;
     if (isASCII) {
-      const dec = new TextDecoder('ascii');
-      const text = dec.decode(bytes.slice(headerEnd));
-      const lines = text.split('\n');
-      const ix = propNames.indexOf('x'), iy = propNames.indexOf('y'), iz = propNames.indexOf('z');
-      const ir = propNames.indexOf('f_dc_0'), ig = propNames.indexOf('f_dc_1'), ib = propNames.indexOf('f_dc_2');
-
-      for (let i = 0; i < nVerts; i++) {
-        const parts = lines[i].trim().split(/\s+/);
-        outView.setFloat32(outPos, parseFloat(parts[ix]), true); outPos += 4;
-        outView.setFloat32(outPos, parseFloat(parts[iy]), true); outPos += 4;
-        outView.setFloat32(outPos, parseFloat(parts[iz]), true); outPos += 4;
-        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(parseFloat(parts[ir])) * 255)));
-        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(parseFloat(parts[ig])) * 255)));
-        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(parseFloat(parts[ib])) * 255)));
-        if (i % CHUNK === 0) { setProgress(i / nVerts * 100); await new Promise(r => setTimeout(r, 0)); }
+      const lines=new TextDecoder('ascii').decode(bytes.slice(headerEnd)).split('\n');
+      const ix=propNames.indexOf('x'),iy=propNames.indexOf('y'),iz=propNames.indexOf('z');
+      const ir=propNames.indexOf('f_dc_0'),ig=propNames.indexOf('f_dc_1'),ib=propNames.indexOf('f_dc_2');
+      for (let i=0;i<nVerts;i++){
+        const p=lines[i].trim().split(/\s+/);
+        outView.setFloat32(outPos,parseFloat(p[ix]),true);outPos+=4;
+        outView.setFloat32(outPos,parseFloat(p[iy]),true);outPos+=4;
+        outView.setFloat32(outPos,parseFloat(p[iz]),true);outPos+=4;
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(parseFloat(p[ir]))*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(parseFloat(p[ig]))*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(parseFloat(p[ib]))*255)));
+        if (i%CHUNK===0){setProgress(i/nVerts*100);await new Promise(r=>setTimeout(r,0));}
       }
     } else {
-      const view = new DataView(arrayBuffer, headerEnd);
-      const fx = fieldMap['x'], fy = fieldMap['y'], fz = fieldMap['z'];
-      const fr = fieldMap['f_dc_0'], fg = fieldMap['f_dc_1'], fb = fieldMap['f_dc_2'];
-
-      for (let i = 0; i < nVerts; i++) {
-        const base = i * vertexSize;
-        outView.setFloat32(outPos, readField(view, base + fx.offset, fx.type, isLE), true); outPos += 4;
-        outView.setFloat32(outPos, readField(view, base + fy.offset, fy.type, isLE), true); outPos += 4;
-        outView.setFloat32(outPos, readField(view, base + fz.offset, fz.type, isLE), true); outPos += 4;
-        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(readField(view, base + fr.offset, fr.type, isLE)) * 255)));
-        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(readField(view, base + fg.offset, fg.type, isLE)) * 255)));
-        outBytes[outPos++] = Math.max(0, Math.min(255, Math.round(sigmoid(readField(view, base + fb.offset, fb.type, isLE)) * 255)));
-        if (i % CHUNK === 0) { setProgress(i / nVerts * 100); await new Promise(r => setTimeout(r, 0)); }
+      const view=new DataView(arrayBuffer,headerEnd);
+      const fx=fieldMap['x'],fy=fieldMap['y'],fz=fieldMap['z'],fr=fieldMap['f_dc_0'],fg=fieldMap['f_dc_1'],fb=fieldMap['f_dc_2'];
+      for (let i=0;i<nVerts;i++){
+        const base=i*vertexSize;
+        outView.setFloat32(outPos,readField(view,base+fx.offset,fx.type,isLE),true);outPos+=4;
+        outView.setFloat32(outPos,readField(view,base+fy.offset,fy.type,isLE),true);outPos+=4;
+        outView.setFloat32(outPos,readField(view,base+fz.offset,fz.type,isLE),true);outPos+=4;
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(readField(view,base+fr.offset,fr.type,isLE))*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(readField(view,base+fg.offset,fg.type,isLE))*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(readField(view,base+fb.offset,fb.type,isLE))*255)));
+        if (i%CHUNK===0){setProgress(i/nVerts*100);await new Promise(r=>setTimeout(r,0));}
       }
     }
-
     setProgress(100);
-
-    const blob = new Blob([outBuf], { type: 'application/octet-stream' });
+    const blob=new Blob([outBuf],{type:'application/octet-stream'});
     if (outputURL) URL.revokeObjectURL(outputURL);
-    outputURL = URL.createObjectURL(blob);
-
-    const outName = selectedFile.name.replace(/\.ply$/i, '') + '_rgb.ply';
-    dlBtn.href = outputURL;
-    dlBtn.download = outName;
-    dlWrap.style.display = 'block';
-
-    log(`Done! ${nVerts.toLocaleString()} vertices converted.`, 'ok');
-    log(`Output size: ${formatBytes(outBuf.byteLength)}`, 'ok');
-    setStatus('Conversion complete!', 'ok');
-
-  } catch (err) {
-    log('ERROR: ' + err.message, 'err');
-    setStatus('Error: ' + err.message, 'err');
+    outputURL=URL.createObjectURL(blob);
+    const outName=selectedFile.name.replace(/\.ply$/i,'')+'_rgb.ply';
+    dlBtn.href=outputURL; dlBtn.download=outName;
+    dlWrap.style.display='block';
+    log(`Done! ${nVerts.toLocaleString()} vertices converted.`,'ok');
+    log(`Output: ${formatBytes(outBuf.byteLength)}`,'ok');
+    setStatus('Conversion complete!','ok');
+  } catch(err) {
+    log('ERROR: '+err.message,'err');
+    setStatus('Error: '+err.message,'err');
   }
+  btnConvert.disabled=false;
+});
+</script>
+<script>
+const cardWrap = document.querySelector('.card-wrap');
+const card     = document.querySelector('.card');
+const shine    = document.getElementById('card-shine');
 
-  btnConvert.disabled = false;
+const MAX_TILT = 5;
+const SCALE    = 1.008;
+
+cardWrap.addEventListener('mousemove', e => {
+  const rect = card.getBoundingClientRect();
+  const cx = rect.left + rect.width  / 2;
+  const cy = rect.top  + rect.height / 2;
+  const dx = (e.clientX - cx) / (rect.width  / 2);
+  const dy = (e.clientY - cy) / (rect.height / 2);
+
+  const rotX = -dy * MAX_TILT;
+  const rotY =  dx * MAX_TILT;
+
+  card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${SCALE})`;
+  card.style.boxShadow = `
+    ${-rotY * 2}px ${rotX * 2}px 60px rgba(0,0,0,0.6),
+    0 2px 12px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08)
+  `;
+
+  const shineX = (dx * 0.5 + 0.5) * 100;
+  const shineY = (dy * 0.5 + 0.5) * 100;
+  shine.style.background = `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255,255,255,0.1) 0%, transparent 65%)`;
+  shine.style.opacity = '1';
+});
+
+cardWrap.addEventListener('mouseleave', () => {
+  card.style.transform = `rotateX(0deg) rotateY(0deg) scale(1)`;
+  card.style.boxShadow = '';
+  shine.style.opacity = '0';
 });
 </script>
 </body>
