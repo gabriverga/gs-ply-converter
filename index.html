@@ -43,7 +43,7 @@
   .blob {
     position: fixed;
     border-radius: 50%;
-    filter: blur(110px);
+    filter: blur(110px) saturate(0);
     pointer-events: none;
     z-index: 0;
     animation: blobDrift ease-in-out infinite;
@@ -415,7 +415,7 @@
   .footer-credit strong a { color: var(--accent); font-weight: 500; opacity: 0.8; }
   .footer-credit strong a:hover { opacity: 1; }
 
-  .github-btn {
+.github-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -805,12 +805,14 @@ btnConvert.addEventListener('click', async () => {
       const ir=propNames.indexOf('f_dc_0'),ig=propNames.indexOf('f_dc_1'),ib=propNames.indexOf('f_dc_2');
       for (let i=0;i<nVerts;i++){
         const p=lines[i].trim().split(/\s+/);
-        outView.setFloat32(outPos,parseFloat(p[ix]),true);outPos+=4;
-        outView.setFloat32(outPos,parseFloat(p[iy]),true);outPos+=4;
-        outView.setFloat32(outPos,parseFloat(p[iz]),true);outPos+=4;
-        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(parseFloat(p[ir]))*255)));
-        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(parseFloat(p[ig]))*255)));
-        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(parseFloat(p[ib]))*255)));
+        const vx=parseFloat(p[ix]),vy=parseFloat(p[iy]),vz=parseFloat(p[iz]);
+        const vr=parseFloat(p[ir]),vg=parseFloat(p[ig]),vb=parseFloat(p[ib]);
+        outView.setFloat32(outPos,vx,true);outPos+=4;
+        outView.setFloat32(outPos,vy,true);outPos+=4;
+        outView.setFloat32(outPos,vz,true);outPos+=4;
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(vr)*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(vg)*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(vb)*255)));
         if (i%CHUNK===0){setProgress(i/nVerts*100);await new Promise(r=>setTimeout(r,0));}
       }
     } else {
@@ -818,12 +820,18 @@ btnConvert.addEventListener('click', async () => {
       const fx=fieldMap['x'],fy=fieldMap['y'],fz=fieldMap['z'],fr=fieldMap['f_dc_0'],fg=fieldMap['f_dc_1'],fb=fieldMap['f_dc_2'];
       for (let i=0;i<nVerts;i++){
         const base=i*vertexSize;
-        outView.setFloat32(outPos,readField(view,base+fx.offset,fx.type,isLE),true);outPos+=4;
-        outView.setFloat32(outPos,readField(view,base+fy.offset,fy.type,isLE),true);outPos+=4;
-        outView.setFloat32(outPos,readField(view,base+fz.offset,fz.type,isLE),true);outPos+=4;
-        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(readField(view,base+fr.offset,fr.type,isLE))*255)));
-        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(readField(view,base+fg.offset,fg.type,isLE))*255)));
-        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(readField(view,base+fb.offset,fb.type,isLE))*255)));
+        const vx=readField(view,base+fx.offset,fx.type,isLE);
+        const vy=readField(view,base+fy.offset,fy.type,isLE);
+        const vz=readField(view,base+fz.offset,fz.type,isLE);
+        const vr=readField(view,base+fr.offset,fr.type,isLE);
+        const vg=readField(view,base+fg.offset,fg.type,isLE);
+        const vb=readField(view,base+fb.offset,fb.type,isLE);
+        outView.setFloat32(outPos,vx,true);outPos+=4;
+        outView.setFloat32(outPos,vy,true);outPos+=4;
+        outView.setFloat32(outPos,vz,true);outPos+=4;
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(vr)*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(vg)*255)));
+        outBytes[outPos++]=Math.max(0,Math.min(255,Math.round(sigmoid(vb)*255)));
         if (i%CHUNK===0){setProgress(i/nVerts*100);await new Promise(r=>setTimeout(r,0));}
       }
     }
